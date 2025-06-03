@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "composite": true,
+      "module": "CommonJS",
+      "esModuleInterop": true,
+      "target": "ES2020",
+      "outDir": "./dist",
+      "rootDir": ".",
+      "strict": true,
+      "skipLibCheck": true,
+      "resolveJsonModule": true,
+      "types": ["vite/client"]
+    },
+    "include": ["src/**/*"]
+  }
