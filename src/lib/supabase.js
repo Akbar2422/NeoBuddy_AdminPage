@@ -32,13 +32,22 @@ export const roomService = {
   // Get all rooms
   async getAllRooms() {
     try {
-      // Get today's date in YYYY-MM-DD format for filtering
-      const today = new Date().toISOString().split('T')[0];
+      // Get today's date in YYYY-MM-DD format using UTC for filtering
+      const now = new Date();
+      const today = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        0, 0, 0
+      ));
+      const todayStr = today.toISOString().split('T')[0];
+      
+      console.log(`roomService.getAllRooms - UTC date: ${todayStr}, Local time: ${new Date().toString()}`);
       
       const { data, error } = await supabase
         .from('rooms')
         .select('*')
-        .eq('session_date', today)
+        .eq('session_date', todayStr)
         .order('created_at', { ascending: false });
       
       if (error) throw error;

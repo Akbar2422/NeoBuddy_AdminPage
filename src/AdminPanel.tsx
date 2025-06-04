@@ -51,16 +51,25 @@ const AdminPanel: React.FC = () => {
           table: 'rooms'
         },
         (payload) => {
-          // Get today's date for filtering
-          const today = new Date().toISOString().split('T')[0];
+          // Get today's date for filtering using UTC
+          const now = new Date();
+          const today = new Date(Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate(),
+            0, 0, 0
+          ));
+          const todayStr = today.toISOString().split('T')[0];
+          
+          console.log(`Realtime event: ${payload.eventType}, UTC date: ${todayStr}, Room date: ${payload.new?.session_date}`);
           
           if (payload.eventType === 'INSERT') {
             setRooms((prev) => {
               const newRoom = payload.new as Room;
               
               // Only add the room if it's scheduled for today
-              if (newRoom.session_date !== today) {
-                console.log(`Ignoring new room ${newRoom.name} - not scheduled for today`);
+              if (newRoom.session_date !== todayStr) {
+                console.log(`Ignoring new room ${newRoom.name} - not scheduled for today (${newRoom.session_date} vs ${todayStr})`);
                 return prev;
               }
               
@@ -77,7 +86,8 @@ const AdminPanel: React.FC = () => {
             
             setRooms((prev) => {
               // If the room is not in our current list and it's not for today, ignore it
-              if (!prev.some(room => room.id === updatedRoom.id) && updatedRoom.session_date !== today) {
+              if (!prev.some(room => room.id === updatedRoom.id) && updatedRoom.session_date !== todayStr) {
+                console.log(`Ignoring updated room - not for today or not in current list`);
                 return prev;
               }
               
@@ -205,14 +215,23 @@ const AdminPanel: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Get today's date in YYYY-MM-DD format for filtering
-      const today = new Date().toISOString().split('T')[0];
+      // Get today's date in YYYY-MM-DD format using UTC for filtering
+      const now = new Date();
+      const today = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        0, 0, 0
+      ));
+      const todayStr = today.toISOString().split('T')[0];
+      
+      console.log(`Loading rooms for UTC date: ${todayStr}, Local time: ${new Date().toString()}`);
       
       // Modify to fetch only rooms for today's date by default
       const { data, error } = await supabase
         .from('rooms')
         .select('*')
-        .eq('session_date', today)
+        .eq('session_date', todayStr)
         .order('created_at', { ascending: false });
   
       if (error) throw error;

@@ -140,24 +140,35 @@ const RoomList = ({ rooms, onEditRoom, onDeleteRoom, isLoading }) => {
 
   // Convert date_option to an actual date string in YYYY-MM-DD format
   const getSessionDate = (dateOption) => {
-    // Create date object for the current date in local timezone
-    const today = new Date()
+    // Create date object for the current date in UTC
+    const now = new Date()
+    
+    // Create a UTC date at 00:00:00 for today
+    const today = new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      0, 0, 0
+    ))
     
     // Create a new date object for the session date
     let sessionDate = new Date(today)
     
     // Adjust the date based on the option
     if (dateOption === 'tomorrow') {
-      sessionDate.setDate(today.getDate() + 1)
+      sessionDate.setUTCDate(today.getUTCDate() + 1)
     } else if (dateOption === 'day_after_tomorrow') {
-      sessionDate.setDate(today.getDate() + 2)
+      sessionDate.setUTCDate(today.getUTCDate() + 2)
     }
     
-    // Format as YYYY-MM-DD using local timezone components to avoid UTC conversion issues
-    const year = sessionDate.getFullYear()
-    // getMonth() is 0-indexed, so add 1
-    const month = String(sessionDate.getMonth() + 1).padStart(2, '0')
-    const day = String(sessionDate.getDate()).padStart(2, '0')
+    // Format as YYYY-MM-DD using UTC components
+    const year = sessionDate.getUTCFullYear()
+    // getUTCMonth() is 0-indexed, so add 1
+    const month = String(sessionDate.getUTCMonth() + 1).padStart(2, '0')
+    const day = String(sessionDate.getUTCDate()).padStart(2, '0')
+    
+    // Log for debugging
+    console.log(`Date option: ${dateOption}, UTC date: ${year}-${month}-${day}, Local time: ${new Date().toString()}`)
     
     return `${year}-${month}-${day}`
   }
